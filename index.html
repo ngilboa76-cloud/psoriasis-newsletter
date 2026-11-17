@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>מחולל ניוזלטר – אגודת הפסוריאזיס הישראלית</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#38507F;--deep:#2A3D63;--orange:#F7953B;--amber:#FBB040;--blue:#6A8AC6;--light:#8BA9D8;--ink:#23293A;--muted:#5F6672;--bg:#F4F6FA;--line:#DDE3EE;--ok:#1E7B4A;--warn:#A65300;--err:#B3261E;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Open Sans',Arial,sans-serif;color:var(--ink);background:var(--bg);}
+  header{background:var(--navy);color:#fff;padding:18px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:6px solid var(--orange)}
+  header h1{margin:0;font-size:22px;font-weight:800}
+  header p{margin:0;color:#E3E9F5;font-size:14px}
+  .layout{display:grid;grid-template-columns:minmax(380px,520px) 1fr;gap:24px;padding:24px;align-items:start}
+  @media (max-width:980px){.layout{grid-template-columns:1fr}}
+  form{display:flex;flex-direction:column;gap:16px}
+  fieldset{border:1px solid var(--line);background:#fff;border-radius:10px;padding:16px 18px 18px;margin:0}
+  legend{font-weight:800;font-size:16px;padding:0 6px;color:var(--navy)}
+  label{display:block;font-weight:700;font-size:14px;margin:12px 0 4px}
+  label:first-of-type{margin-top:4px}
+  .hint{font-weight:400;color:var(--muted);font-size:12.5px}
+  input,textarea{width:100%;font:inherit;font-size:15px;padding:9px 11px;border:1px solid #C8D1E0;border-radius:7px;background:#fff;color:var(--ink)}
+  input:focus,textarea:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+  input[dir=ltr]{text-align:left}
+  textarea{min-height:92px;resize:vertical;line-height:1.55}
+  .count{font-size:12px;color:var(--muted);text-align:left;margin-top:3px}
+  .count.over{color:var(--err);font-weight:700}
+  .item{border:1px dashed #C8D1E0;border-radius:9px;padding:12px 14px;margin-top:14px;background:#FAFBFD}
+  .item h3{margin:0 0 4px;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+  button{font:inherit;font-weight:700;border-radius:7px;border:0;cursor:pointer;padding:10px 16px;font-size:15px}
+  .primary{background:var(--navy);color:#fff}
+  .primary:hover{background:var(--deep)}
+  .ghost{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
+  .soft{background:#FFF3E6;color:#8A4300;border:1.5px solid var(--orange)}
+  .link{background:none;color:var(--err);padding:2px 4px;font-size:13px}
+  details summary{cursor:pointer;font-weight:800;color:var(--navy)}
+  .side{position:sticky;top:16px;display:flex;flex-direction:column;gap:14px}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .bar .sp{flex:1}
+  .seg button{background:#fff;color:var(--muted);border:1px solid #C8D1E0;padding:7px 12px;font-size:13px}
+  .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .seg button:first-child{border-radius:0 7px 7px 0}.seg button:last-child{border-radius:7px 0 0 7px}
+  .frame{background:#E4E9F2;border-radius:10px;padding:14px;display:flex;justify-content:center;min-height:400px}
+  iframe{border:0;background:#fff;width:700px;max-width:100%;height:1400px;border-radius:6px;transition:width .2s}
+  iframe.mobile{width:390px}
+  .checks{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:14px}
+  .checks h2{font-size:15px;margin:0 0 6px}
+  .checks ul{margin:0;padding:0 18px 0 0}
+  .checks li{margin:3px 0}
+  .ok{color:var(--ok)}.warn{color:var(--warn)}.err{color:var(--err)}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>מחולל ניוזלטר – אגודת הפסוריאזיס</h1>
+  <p>ממלאים תוכן, בודקים בתצוגה המקדימה, מעתיקים את הקוד ומדביקים באינפוריו.</p>
+</header>
+
+<div class="layout">
+<form id="f" autocomplete="off" onsubmit="return false">
+
+  <div><button type="button" class="soft" id="sample">מילוי תוכן לדוגמה (מוקאפ נובמבר 2026)</button></div>
+
+  <fieldset>
+    <legend>פרטי שליחה</legend>
+    <label for="subject">שורת נושא <span class="hint">– עד 50 תווים. מוזנת באינפוריו, לא בקוד</span></label>
+    <input id="subject" data-max="50">
+    <div class="count" data-for="subject"></div>
+    <label for="preheader">טקסט מקדים <span class="hint">– עד 90 תווים, משלים את שורת הנושא</span></label>
+    <input id="preheader" data-max="90">
+    <div class="count" data-for="preheader"></div>
+    <label for="issue">חודש ושנה</label>
+    <input id="issue" placeholder="דצמבר 2026">
+  </fieldset>
+
+  <fieldset>
+    <legend>כותרת הגיליון</legend>
+    <label for="h1a">שורה 1 <span class="hint">– עד 18 תווים</span></label>
+    <input id="h1a" data-max="18">
+    <div class="count" data-for="h1a"></div>
+    <label for="h1b">שורה 2 <span class="hint">– עד 18 תווים, אפשר להשאיר ריק</span></label>
+    <input id="h1b" data-max="18">
+    <div class="count" data-for="h1b"></div>
+    <label for="sub">משפט משנה <span class="hint">– עד 100 תווים</span></label>
+    <input id="sub" data-max="100">
+    <div class="count" data-for="sub"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>פתיח</legend>
+    <label for="greet">שורת פנייה</label>
+    <input id="greet" value="שלום רב,">
+    <label for="opening">טקסט הפתיח <span class="hint">– 3–4 שורות. שורה ריקה = פסקה חדשה</span></label>
+    <textarea id="opening"></textarea>
+    <label for="signName">שם החותם/ת</label>
+    <input id="signName">
+    <label for="signRole">תפקיד <span class="hint">– יופיע כ"[תפקיד], אגודת הפסוריאזיס הישראלית"</span></label>
+    <input id="signRole">
+  </fieldset>
+
+  <fieldset>
+    <legend>אייטמים</legend>
+    <div class="hint">האייטם הראשון הוא המוביל ומקבל כפתור. אפשר להוסיף עד 3 אייטמים נוספים.</div>
+    <div id="items"></div>
+    <div style="margin-top:12px"><button type="button" class="ghost" id="addItem">+ הוספת אייטם</button></div>
+  </fieldset>
+
+  <fieldset>
+    <details id="fixedBox">
+      <summary>פרטים קבועים (ממלאים פעם אחת, נשמרים בדפדפן)</summary>
+      <label for="logo">קישור ללוגו <span class="hint">– PNG ולא SVG (ג'ימייל לא מציג SVG). מומלץ מספריית הקבצים של אינפוריו</span></label>
+      <input id="logo" dir="ltr">
+      <label for="unsub">קישור או תג הסרה של אינפוריו <span class="hint">– מה שאינפוריו נותנת להסרה מרשימת התפוצה</span></label>
+      <input id="unsub" dir="ltr">
+      <label for="webview">קישור או תג "צפייה בדפדפן" <span class="hint">– אם ריק, השורה לא תופיע</span></label>
+      <input id="webview" dir="ltr">
+      <label for="address">כתובת האגודה</label>
+      <input id="address" value="דרך השלום 22, תל אביב">
+      <label for="phone">טלפון המשרד</label>
+      <input id="phone" value="03-6247611">
+      <label for="hotline">קו תמיכה 24/7 <span class="hint">– אם ריק, הפס לא יופיע</span></label>
+      <input id="hotline" dir="ltr" value="*6247">
+      <label for="join">קישור להצטרפות</label>
+      <input id="join" dir="ltr" value="https://psoriasis.org.il/%D7%A2%D7%9C-%D7%94%D7%90%D7%92%D7%95%D7%93%D7%94/%D7%94%D7%A6%D7%98%D7%A8%D7%A4%D7%95%D7%AA-%D7%90%D7%9C-%D7%94%D7%90%D7%92%D7%95%D7%93%D7%94/">
+      <label for="donate">קישור לתרומה</label>
+      <input id="donate" dir="ltr" value="https://psoriasis.org.il/%D7%97%D7%93%D7%A9-%D7%91%D7%90%D7%AA%D7%A8/%D7%AA%D7%A8%D7%95%D7%9E%D7%94-%D7%9C%D7%A2%D7%9E%D7%95%D7%AA%D7%94/">
+    </details>
+  </fieldset>
+
+  <div><button type="button" class="link" id="reset">ניקוי תוכן הגיליון</button></div>
+</form>
+
+<div class="side">
+  <div class="bar">
+    <button type="button" class="primary" id="copy">העתקת קוד HTML</button>
+    <button type="button" class="ghost" id="download">הורדת קובץ</button>
+    <span class="sp"></span>
+    <span class="seg"><button type="button" class="on" data-w="desktop">מחשב</button><button type="button" data-w="mobile">נייד</button></span>
+  </div>
+  <div class="checks" id="checks"></div>
+  <div class="frame"><iframe id="pv" title="תצוגה מקדימה"></iframe></div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<template id="itemTpl">
+  <div class="item">
+    <h3><span class="ttl"></span><button type="button" class="link rm">הסרה</button></h3>
+    <label>תגית נושא <span class="hint">– לדוגמה: זכויות, טיפולים, אירועים, סקר</span></label>
+    <input data-k="tag">
+    <label>כותרת</label>
+    <input data-k="title">
+    <label>תקציר <span class="hint">– 2–3 שורות</span></label>
+    <textarea data-k="text" style="min-height:70px"></textarea>
+    <label>קישור</label>
+    <input data-k="url" dir="ltr" placeholder="https://">
+    <label>קישור לתמונה <span class="hint">– רוחב 1040 פיקסלים, JPG עד 200KB, אופציונלי</span></label>
+    <input data-k="img" dir="ltr" placeholder="https://">
+    <label>תיאור התמונה <span class="hint">– לנגישות ולמי שהתמונות חסומות אצלו</span></label>
+    <input data-k="alt">
+    <label class="cta-l">טקסט הכפתור</label>
+    <input data-k="cta">
+  </div>
+</template>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  var FIELDS = ['subject','preheader','issue','h1a','h1b','sub','greet','opening','signName','signRole'];
+  var FIXED = ['logo','unsub','webview','address','phone','hotline','join','donate'];
+  var KEY_DRAFT = 'psori-nl-draft-v1', KEY_FIXED = 'psori-nl-fixed-v1';
+  var MAX_ITEMS = 4;
+  var ORG = 'אגודת הפסוריאזיס הישראלית';
+  var SITE = 'https://psoriasis.org.il/';
+  // absolute base for files hosted next to this page (logo, sample images)
+  var BASE = /^https?:/.test(location.protocol) ? new URL('.', location.href).href : 'https://ngilboa76-cloud.github.io/psoriasis-newsletter/';
+  $('logo').value = BASE + 'img/logo.png';
+
+  function store(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  function load(k){ try{ var s = localStorage.getItem(k); return s ? JSON.parse(s) : null; }catch(e){ return null; } }
+
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  // href values may be platform tags; escape only quotes and angle brackets
+  function attr(s){ return String(s == null ? '' : s).trim().replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  // Hebrew characters in links break in some mail clients: percent-encode non-ASCII only
+  function url(s){ return attr(String(s == null ? '' : s).trim().replace(/[^\x00-\x7F]+/g, function(m){ return encodeURIComponent(m); })); }
+  function paras(s){
+    return String(s || '').trim().split(/\n\s*\n/).map(function(p){ return esc(p.trim()).replace(/\n/g,'<br>'); })
+      .filter(Boolean).join('<br><br>');
+  }
+
+  /* ---------- items UI ---------- */
+  var itemsBox = $('items');
+  function addItem(data){
+    if (itemsBox.children.length >= MAX_ITEMS) return;
+    var node = $('itemTpl').content.firstElementChild.cloneNode(true);
+    data = data || {};
+    node.querySelectorAll('[data-k]').forEach(function(el){ el.value = data[el.dataset.k] || ''; });
+    node.querySelector('.rm').addEventListener('click', function(){ node.remove(); relabel(); update(); });
+    itemsBox.appendChild(node); relabel();
+  }
+  function relabel(){
+    Array.prototype.forEach.call(itemsBox.children, function(n, i){
+      n.querySelector('.ttl').textContent = i === 0 ? 'אייטם מוביל' : 'אייטם ' + (i + 1);
+      n.querySelector('.cta-l').innerHTML = i === 0 ? 'טקסט הכפתור <span class="hint">– לדוגמה: לכתבה המלאה</span>' : 'טקסט הקישור <span class="hint">– לדוגמה: להמשך קריאה, להרשמה</span>';
+      n.querySelector('.rm').style.visibility = i === 0 ? 'hidden' : 'visible';
+    });
+    $('addItem').disabled = itemsBox.children.length >= MAX_ITEMS;
+  }
+  function readItems(){
+    return Array.prototype.map.call(itemsBox.children, function(n){
+      var o = {}; n.querySelectorAll('[data-k]').forEach(function(el){ o[el.dataset.k] = el.value; }); return o;
+    });
+  }
+  function itemFilled(it){ return ['tag','title','text','url','img'].some(function(k){ return (it[k] || '').trim(); }); }
+
+  /* ---------- email builder ---------- */
+  var FF = "font-family:'Open Sans',Arial,Helvetica,sans-serif;";
+  var C = {navy:'#38507F', deep:'#2A3D63', orange:'#F7953B', tag:'#B35A10', ink:'#23293A', muted:'#5F6672', bg:'#F4F6FA', line:'#DDE3EE', soft:'#E3E9F5'};
+  var RULE = '<tr><td height="1" style="height:1px;background:' + C.line + ';font-size:0;line-height:0;">&nbsp;</td></tr>';
+  // signature stripe: the six colours of the logo figures
+  var STRIPE_COLORS = ['#38507F','#6A8AC6','#8BA9D8','#F9ED32','#FBB040','#F7953B']; // RTL: first cell is rightmost, so this mirrors the logo
+  function stripe(h){
+    return '<tr><td style="padding:0;font-size:0;line-height:0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl"><tr>' +
+      STRIPE_COLORS.map(function(c){ return '<td height="' + h + '" style="height:' + h + 'px;background:' + c + ';font-size:0;line-height:0;" bgcolor="' + c + '">&nbsp;</td>'; }).join('') +
+      '</tr></table></td></tr>';
+  }
+
+  function img(it, h){
+    if (!(it.img || '').trim()) return '';
+    var tag = '<img class="img-full" src="' + url(it.img) + '" width="520" alt="' + esc(it.alt || it.title || '') + '" style="width:520px;height:auto;max-width:100%;display:block;border-radius:8px;background:' + C.soft + ';">';
+    if ((it.url || '').trim()) tag = '<a href="' + url(it.url) + '" target="_blank">' + tag + '</a>';
+    return '<tr><td style="padding:' + h + ';">' + tag + '</td></tr>';
+  }
+  function btn(href, label, bg, fg, size, pad, h, w){
+    return '<tr><td class="btn" align="right">' +
+      '<!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="' + url(href) + '" style="height:' + h + 'px;v-text-anchor:middle;width:' + w + 'px;" arcsize="50%" stroke="f" fillcolor="' + bg + '"><w:anchorlock/><center style="color:' + fg + ';font-family:Arial,sans-serif;font-size:' + size + 'px;font-weight:bold;">' + esc(label) + '</center></v:roundrect><![endif]-->' +
+      '<!--[if !mso]><!--><a href="' + url(href) + '" target="_blank" class="ff" style="display:inline-block;background:' + bg + ';color:' + fg + ';' + FF + 'font-size:' + size + 'px;line-height:' + (size + 4) + 'px;font-weight:800;text-decoration:none;padding:' + pad + ';border-radius:999px;mso-hide:all;">' + esc(label) + ' &larr;</a><!--<![endif]-->' +
+      '</td></tr>';
+  }
+  function itemBlock(it, i, isLast){
+    var featured = i === 0;
+    var rows = '';
+    if (!featured) rows += RULE;
+    rows += img(it, featured ? '0 0 20px' : '30px 0 18px');
+    if (!featured && !(it.img || '').trim()) rows += '<tr><td style="height:28px;font-size:0;line-height:0;">&nbsp;</td></tr>';
+    if ((it.tag || '').trim()) rows += '<tr><td class="ff" style="' + FF + 'font-size:13px;line-height:18px;font-weight:800;color:' + C.tag + ';text-align:right;padding-bottom:8px;">' + esc(it.tag) + '</td></tr>';
+    if ((it.title || '').trim()) rows += '<tr><td class="h2 ff" style="' + FF + 'font-size:' + (featured ? 26 : 22) + 'px;line-height:' + (featured ? 34 : 30) + 'px;font-weight:800;color:' + C.navy + ';text-align:right;padding-bottom:' + (featured ? 10 : 8) + 'px;">' + esc(it.title) + '</td></tr>';
+    if ((it.text || '').trim()) rows += '<tr><td class="ff" style="' + FF + 'font-size:17px;line-height:28px;color:' + C.ink + ';text-align:right;padding-bottom:' + (featured ? 22 : 12) + 'px;">' + paras(it.text) + '</td></tr>';
+    var label = (it.cta || '').trim() || (featured ? 'לכתבה המלאה' : 'להמשך קריאה');
+    if ((it.url || '').trim()) {
+      rows += featured
+        ? btn(it.url, label, C.navy, '#FFFFFF', 16, '14px 30px', 48, 220)
+        : '<tr><td class="ff" style="' + FF + 'font-size:16px;line-height:24px;font-weight:700;text-align:right;"><a href="' + url(it.url) + '" target="_blank" style="color:' + C.navy + ';text-decoration:none;border-bottom:2px solid ' + C.orange + ';">' + esc(label) + ' &larr;</a></td></tr>';
+    }
+    var pad = featured ? '36px 40px ' + (isLast ? '44px' : '8px') : '36px 40px ' + (isLast ? '44px' : '0');
+    return '<tr><td class="px" style="padding:' + pad + ';"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl">' + rows + '</table></td></tr>';
+  }
+
+  function build(d){
+    var items = d.items.filter(function(it, i){ return i === 0 || itemFilled(it); });
+    var headline = esc(d.h1a.trim()) + (d.h1b.trim() ? '<br>' + esc(d.h1b.trim()) : '');
+    var out = [];
+    out.push('<!DOCTYPE html>\n<html lang="he" dir="rtl" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta http-equiv="X-UA-Compatible" content="IE=edge">\n<meta name="x-apple-disable-message-reformatting">\n<meta name="color-scheme" content="light">\n<meta name="supported-color-schemes" content="light">\n<title>' + esc(d.subject || 'ניוזלטר ' + ORG) + '</title>\n<!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><style>body,table,td,a,p{font-family:Arial,sans-serif !important;}</style><![endif]-->\n<!--[if !mso]><!--><link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700;800&display=swap" rel="stylesheet"><!--<![endif]-->\n<style>\nbody{margin:0;padding:0;width:100% !important;background:' + C.bg + ';-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}\ntable{border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0;}\nimg{border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;display:block;}\na{color:' + C.navy + ';}\n@media only screen and (max-width:620px){.wrap{width:100% !important;}.px{padding-left:22px !important;padding-right:22px !important;}.h1{font-size:34px !important;line-height:42px !important;}.h2{font-size:22px !important;line-height:30px !important;}.img-full{width:100% !important;height:auto !important;}.btn a{display:block !important;text-align:center !important;}.hide-m{display:none !important;}}\n</style>\n</head>\n<body style="margin:0;padding:0;background:' + C.bg + ';">');
+    if (d.preheader.trim()) out.push('<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:' + C.bg + ';">' + esc(d.preheader.trim()) + '&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>');
+    out.push('<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + C.bg + ';" dir="rtl"><tr><td align="center" style="padding:20px 10px 32px;">');
+    out.push('<!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td><![endif]-->');
+    out.push('<table role="presentation" class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:#FFFFFF;" dir="rtl">');
+    if (d.webview.trim()) out.push('<tr><td class="px ff" style="padding:12px 40px;background:' + C.bg + ';' + FF + 'font-size:12px;line-height:18px;color:' + C.muted + ';text-align:center;">לא מוצג כראוי? <a href="' + url(d.webview) + '" style="color:' + C.navy + ';text-decoration:underline;">לצפייה בדפדפן</a></td></tr>');
+    // logo row
+    out.push('<tr><td class="px" style="padding:26px 40px 22px;background:#FFFFFF;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl"><tr>' +
+      '<td align="right" valign="middle"><a href="' + SITE + '" target="_blank"><img src="' + url(d.logo) + '" width="150" alt="' + ORG + '" style="width:150px;height:auto;display:block;font-family:Arial,sans-serif;font-size:18px;font-weight:bold;color:' + C.navy + ';"></a></td>' +
+      '<td align="left" valign="middle" class="ff hide-m" style="' + FF + 'font-size:13px;line-height:18px;font-weight:700;color:' + C.muted + ';text-align:left;">ניוזלטר' + (d.issue.trim() ? '<br><span style="color:' + C.navy + ';">' + esc(d.issue.trim()) + '</span>' : '') + '</td>' +
+      '</tr></table></td></tr>');
+    out.push(stripe(6));
+    // hero
+    var hero = '<tr><td class="ff" style="' + FF + 'font-size:14px;line-height:20px;font-weight:800;color:' + C.amberText + ';text-align:right;padding-bottom:12px;">אתם לא לבד</td></tr>' +
+      '<tr><td class="h1 ff" style="' + FF + 'font-size:42px;line-height:52px;font-weight:800;color:#FFFFFF;text-align:right;">' + headline + '</td></tr>' +
+      (d.sub.trim() ? '<tr><td class="ff" style="' + FF + 'font-size:18px;line-height:28px;color:' + C.soft + ';text-align:right;padding-top:16px;">' + esc(d.sub.trim()) + '</td></tr>' : '');
+    out.push('<tr><td class="px" style="padding:40px 40px 40px;background:' + C.navy + ';" bgcolor="' + C.navy + '"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl">' + hero + '</table></td></tr>');
+    // opening
+    var op = '';
+    if (d.greet.trim()) op += '<tr><td class="ff" style="' + FF + 'font-size:20px;line-height:28px;font-weight:800;color:' + C.navy + ';text-align:right;padding-bottom:12px;">' + esc(d.greet.trim()) + '</td></tr>';
+    if (d.opening.trim()) op += '<tr><td class="ff" style="' + FF + 'font-size:17px;line-height:28px;color:' + C.ink + ';text-align:right;">' + paras(d.opening) + '</td></tr>';
+    if (d.signName.trim()) op += '<tr><td style="padding-top:22px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" align="right" dir="rtl"><tr><td width="4" style="width:4px;background:' + C.orange + ';font-size:0;line-height:0;" bgcolor="' + C.orange + '">&nbsp;</td><td class="ff" style="padding-right:12px;' + FF + 'font-size:15px;line-height:21px;color:' + C.ink + ';text-align:right;"><strong style="font-weight:800;">' + esc(d.signName.trim()) + '</strong><br><span style="color:' + C.muted + ';">' + (d.signRole.trim() ? esc(d.signRole.trim()) + ', ' : '') + ORG + '</span></td></tr></table></td></tr>';
+    if (op) {
+      out.push('<tr><td class="px" style="padding:40px 40px 34px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl">' + op + '</table></td></tr>');
+      out.push('<tr><td class="px" style="padding:0 40px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">' + RULE + '</table></td></tr>');
+    }
+    items.forEach(function(it, i){ out.push(itemBlock(it, i, i === items.length - 1)); });
+    // fixed closing: hotline + membership + donation
+    if (d.hotline.trim()) {
+      out.push('<tr><td class="px" style="padding:22px 40px;background:#FFF4E8;" bgcolor="#FFF4E8"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl"><tr>' +
+        '<td class="ff" style="' + FF + 'font-size:16px;line-height:24px;color:' + C.ink + ';text-align:right;"><strong style="font-weight:800;color:' + C.navy + ';">צריכים לדבר עם מישהו?</strong><br>קו התמיכה של האגודה פתוח 24/7</td>' +
+        '<td align="left" valign="middle" class="ff" style="' + FF + 'font-size:24px;line-height:30px;font-weight:800;text-align:left;white-space:nowrap;"><a href="tel:' + url(d.hotline) + '" style="color:' + C.navy + ';text-decoration:none;" dir="ltr">' + esc(d.hotline.trim()) + '</a></td>' +
+        '</tr></table></td></tr>');
+    }
+    out.push(stripe(4));
+    out.push('<tr><td class="px" style="padding:44px 40px 42px;background:' + C.deep + ';" bgcolor="' + C.deep + '"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl">' +
+      '<tr><td class="ff" style="' + FF + 'font-size:13px;line-height:18px;font-weight:800;color:' + C.amberText + ';text-align:right;padding-bottom:10px;">חברות באגודה</td></tr>' +
+      '<tr><td class="h2 ff" style="' + FF + 'font-size:30px;line-height:38px;font-weight:800;color:#FFFFFF;text-align:right;padding-bottom:14px;">יחד אנחנו חזקים יותר</td></tr>' +
+      '<tr><td class="ff" style="' + FF + 'font-size:17px;line-height:28px;color:' + C.soft + ';text-align:right;padding-bottom:26px;">ב-10 ש"ח בחודש מקבלים ליווי במימוש זכויות, הסדרי שהייה בים המלח, קייטנת ילדים במחיר מסובסד, חוברת מידע וכניסה חופשית לכנסים, ומחזקים את הקול של המתמודדים מול מקבלי ההחלטות.</td></tr>' +
+      btn(d.join, 'להצטרפות לאגודה', C.orange, C.ink, 18, '15px 38px', 52, 230) +
+      (d.donate.trim() ? '<tr><td class="ff" style="' + FF + 'font-size:15px;line-height:22px;color:' + C.soft + ';text-align:right;padding-top:22px;">רוצים לתמוך גם בדרך אחרת? <a href="' + url(d.donate) + '" target="_blank" style="color:#FFFFFF;font-weight:700;text-decoration:underline;">לתרומה לאגודה</a></td></tr>' : '') +
+      '</table></td></tr>');
+    // footer
+    var dot = '<span style="color:#C8D1E0;">&nbsp;&nbsp;•&nbsp;&nbsp;</span>';
+    var soc = function(h, t){ return '<a href="' + h + '" target="_blank" style="color:' + C.navy + ';text-decoration:none;">' + t + '</a>'; };
+    var contact = 'https://psoriasis.org.il/%D7%A6%D7%A8%D7%95-%D7%A7%D7%A9%D7%A8/';
+    var privacy = 'https://psoriasis.org.il/wp-content/uploads/2026/01/psoriasis-privacy-policy.pdf';
+    var line2 = [d.address.trim() ? esc(d.address.trim()) : '', d.phone.trim() ? '<span dir="ltr">' + esc(d.phone.trim()) + '</span>' : '', '<a href="' + contact + '" target="_blank" style="color:' + C.muted + ';text-decoration:underline;">צרו קשר</a>'].filter(Boolean).join(' &nbsp;|&nbsp; ');
+    out.push('<tr><td class="px" style="padding:30px 40px 34px;background:#FFFFFF;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl">' +
+      '<tr><td class="ff" style="' + FF + 'font-size:15px;line-height:22px;font-weight:700;text-align:center;padding-bottom:16px;">' +
+      soc('https://www.facebook.com/psoriasis.org.il/','פייסבוק') + dot + soc('https://www.instagram.com/psoriasis_israel/','אינסטגרם') + dot + soc('https://www.youtube.com/channel/UCD6IZrDROotYw8u1E0CcklA/videos','יוטיוב') + dot + soc(SITE,'לאתר') + '</td></tr>' +
+      '<tr><td class="ff" style="' + FF + 'font-size:12px;line-height:19px;color:' + C.muted + ';text-align:center;">' + ORG + '<br>' + line2 + '<br>' +
+      'קיבלתם מייל זה כי נרשמתם לעדכונים מהאגודה.' + (d.unsub.trim() ? ' &nbsp;<a href="' + url(d.unsub) + '" target="_blank" style="color:' + C.muted + ';text-decoration:underline;">להסרה מרשימת התפוצה</a>' : '') +
+      ' &nbsp;|&nbsp; <a href="' + privacy + '" target="_blank" style="color:' + C.muted + ';text-decoration:underline;">מדיניות פרטיות</a></td></tr></table></td></tr>');
+    out.push('</table>\n<!--[if mso]></td></tr></table><![endif]-->\n</td></tr></table>\n</body>\n</html>');
+    return out.join('\n');
+  }
+  C.amberText = '#FBB040';
+
+  /* ---------- checks ---------- */
+  function checks(d, html){
+    var r = [];
+    var bytes = new Blob([html]).size;
+    var it0 = d.items[0] || {};
+    function need(v, msg){ if (!String(v || '').trim()) r.push(['err', msg]); }
+    need(d.subject, 'חסרה שורת נושא');
+    need(d.h1a, 'חסרה כותרת הגיליון');
+    need(d.opening, 'חסר טקסט פתיח');
+    need(it0.title, 'לאייטם המוביל חסרה כותרת');
+    need(it0.url, 'לאייטם המוביל חסר קישור');
+    need(d.unsub, 'חסר קישור הסרה (בפרטים הקבועים) – חובה לפני שליחה');
+    if (!d.address.trim()) r.push(['warn', 'חסרה כתובת האגודה בפוטר']);
+    document.querySelectorAll('[data-max]').forEach(function(el){
+      if (el.value.trim().length > +el.dataset.max) r.push(['warn', 'השדה "' + el.labels[0].childNodes[0].textContent.trim() + '" ארוך מהמומלץ']);
+    });
+    d.items.forEach(function(it, i){
+      if (i > 0 && !itemFilled(it)) return;
+      var n = i === 0 ? 'באייטם המוביל' : 'באייטם ' + (i + 1);
+      var im = (it.img || '').trim();
+      if (im && !/^https:\/\//i.test(im)) r.push(['err', 'קישור התמונה ' + n + ' חייב להתחיל ב-https://']);
+      if (im && /\.svg(\?|$)/i.test(im)) r.push(['err', 'התמונה ' + n + ' היא SVG – ג\'ימייל לא מציג SVG, יש להשתמש ב-JPG או PNG']);
+      if (im && /\.png(\?|$)/i.test(im) && /screenshot/i.test(im)) r.push(['warn', 'התמונה ' + n + ' היא צילום מסך PNG – לרוב כבדה מאוד, עדיף JPG מוקטן']);
+      if (im && !(it.alt || '').trim()) r.push(['warn', 'חסר תיאור תמונה ' + n]);
+      if (i > 0 && !(it.title || '').trim()) r.push(['err', 'חסרה כותרת ' + n]);
+    });
+    if (/\.svg(\?|$)/i.test(d.logo)) r.push(['err', 'הלוגו הוא SVG – ג\'ימייל לא מציג SVG']);
+    if (d.logo.indexOf('github.io') > -1) r.push(['warn', 'הלוגו מאוחסן בגיטהאב – עדיף להעלות אותו לספריית הקבצים של אינפוריו']);
+    var kb = (bytes / 1024).toFixed(1);
+    r.push([bytes < 90 * 1024 ? 'ok' : 'err', 'משקל הקוד: ' + kb + 'KB (‏Gmail חותך מעל 102KB)']);
+    if (!r.some(function(x){ return x[0] === 'err'; })) r.unshift(['ok', 'מוכן להעתקה']);
+    return r;
+  }
+
+  /* ---------- sample (mockup) ---------- */
+  var SAMPLE = {
+    subject: 'חודש המודעות לפסוריאזיס: סקר חדש וסיפורים',
+    preheader: 'ספרו לנו מה אתם צריכים, ותכירו את הסיפורים שמאחורי העור',
+    issue: 'נובמבר 2026',
+    h1a: 'חודש המודעות', h1b: 'לפסוריאזיס',
+    sub: 'סקר צרכים חדש, סיפורים מעבר לעור, ומידע שכדאי שיהיה לכם בהישג יד',
+    greet: 'שלום רב,',
+    opening: 'נובמבר הוא חודש המודעות לפסוריאזיס, ואנחנו מזמינים אתכם להיות חלק ממנו: לספר, לשתף ולעזור לנו להבין טוב יותר מה אתם צריכים.\n\nהחודש יצא לדרך סקר צרכים חדש, ובמקביל עלה אתר עם סיפורים של מתמודדים ומתמודדות. מצרפים כאן את שניהם, יחד עם מידע שימושי מהאתר שלנו.',
+    signName: 'צוות האגודה', signRole: '',
+    items: [
+      {tag:'סקר צרכים', title:'ספרו לנו מה אתם באמת צריכים', text:'הסקר פתוח לכל מי שחי עם פסוריאזיס בישראל, גם אם אינכם חברי האגודה. התשובות יעזרו לנו להחליט אילו שירותים ופעילויות לקדם. המילוי נמשך 6–8 דקות, והתשובות אנונימיות.', url:'https://psoriasis.org.il/%D7%97%D7%93%D7%A9-%D7%91%D7%90%D7%AA%D7%A8/seker11-11/', img: BASE + 'img/survey.jpg', alt:'סקר צרכים לכל המתמודדים והמתמודדות עם פסוריאזיס בישראל', cta:'למילוי הסקר'},
+      {tag:'חודש המודעות', title:'סיפורים מעבר לעור', text:'לרגל חודש המודעות עלה אתר עם סיפורים של ילדים ומבוגרים שחיים עם פסוריאזיס. כנסו, צפו ושתפו עם מי שחשוב לכם.', url:'https://beyond-the-skin-stories.lovable.app/', img: BASE + 'img/awareness.jpg', alt:'ילד בבריכה עם פסוריאזיס על הידיים', cta:'לצפייה בסיפורים'},
+      {tag:'טיפולים', title:'המדריך המלא לטיפול בים המלח', text:'מתכננים טיפול באקלים ים המלח? במדריך של האגודה מרוכז המידע שכדאי להכיר לפני שיוצאים לדרך.', url:'https://psoriasis.org.il/%D7%9B%D7%9C%D7%9C%D7%99/dead-sea-2020/', img:'', alt:'', cta:'למדריך'}
+    ]
+  };
+  function fill(dr){
+    FIELDS.forEach(function(k){ if (dr[k] != null) $(k).value = dr[k]; });
+    itemsBox.innerHTML = '';
+    (dr.items && dr.items.length ? dr.items : [{},{},{}]).forEach(addItem);
+  }
+
+  /* ---------- state ---------- */
+  function data(){
+    var d = {}; FIELDS.concat(FIXED).forEach(function(k){ d[k] = $(k).value; }); d.items = readItems(); return d;
+  }
+  var lastHtml = '', timer = null;
+  function render(){
+    var d = data();
+    document.querySelectorAll('.count').forEach(function(c){
+      var el = $(c.dataset.for), n = el.value.trim().length, m = +el.dataset.max;
+      c.textContent = n + ' / ' + m; c.classList.toggle('over', n > m);
+    });
+    lastHtml = build(d);
+    $('pv').srcdoc = lastHtml;
+    $('checks').innerHTML = '<h2>בדיקות</h2><ul>' + checks(d, lastHtml).map(function(x){
+      return '<li class="' + x[0] + '">' + (x[0] === 'ok' ? '✓ ' : x[0] === 'warn' ? '! ' : '✕ ') + esc(x[1]) + '</li>';
+    }).join('') + '</ul>';
+    var draft = {}; FIELDS.forEach(function(k){ draft[k] = d[k]; }); draft.items = d.items; store(KEY_DRAFT, draft);
+    var fixed = {}; FIXED.forEach(function(k){ fixed[k] = d[k]; }); store(KEY_FIXED, fixed);
+  }
+  function update(){ clearTimeout(timer); timer = setTimeout(render, 150); }
+  window.__psoriNL = {build: build, data: data, render: render, html: function(){ return lastHtml; }};
+
+  function toast(t){ var e = $('toast'); e.textContent = t; e.classList.add('show'); setTimeout(function(){ e.classList.remove('show'); }, 1800); }
+
+  $('copy').addEventListener('click', function(){
+    var done = function(){ toast('הקוד הועתק'); };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(lastHtml).then(done, fallback);
+    } else fallback();
+    function fallback(){
+      var ta = document.createElement('textarea'); ta.value = lastHtml; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch(e) { toast('ההעתקה נכשלה – נסו להוריד קובץ'); }
+      ta.remove();
+    }
+  });
+  $('download').addEventListener('click', function(){
+    var name = 'psoriasis-newsletter' + ($('issue').value.trim() ? '-' + $('issue').value.trim().replace(/\s+/g,'-') : '') + '.html';
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lastHtml], {type:'text/html'})); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+  document.querySelectorAll('.seg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.seg button').forEach(function(x){ x.classList.toggle('on', x === b); });
+      $('pv').classList.toggle('mobile', b.dataset.w === 'mobile');
+    });
+  });
+  $('addItem').addEventListener('click', function(){ addItem(); update(); });
+  $('sample').addEventListener('click', function(){
+    if (FIELDS.some(function(k){ return $(k).value.trim() && k !== 'greet'; }) && !window.confirm('למלא תוכן לדוגמה? התוכן הנוכחי יוחלף.')) return;
+    fill(SAMPLE); update();
+  });
+  $('reset').addEventListener('click', function(){
+    if (!window.confirm('לנקות את כל תוכן הגיליון? הפרטים הקבועים יישארו.')) return;
+    FIELDS.forEach(function(k){ $(k).value = k === 'greet' ? 'שלום רב,' : ''; });
+    itemsBox.innerHTML = ''; addItem(); addItem(); addItem(); update();
+  });
+  document.getElementById('f').addEventListener('input', update);
+  $('pv').addEventListener('load', function(){
+    try { var h = $('pv').contentDocument.documentElement.scrollHeight; if (h) $('pv').style.height = (h + 20) + 'px'; } catch(e) {}
+  });
+
+  /* ---------- init ---------- */
+  var fx = load(KEY_FIXED); if (fx) FIXED.forEach(function(k){ if (fx[k] != null && fx[k] !== '') $(k).value = fx[k]; });
+  if (!fx || !fx.unsub) $('fixedBox').open = true;
+  var dr = load(KEY_DRAFT);
+  if (dr) fill(dr); else { addItem(); addItem(); addItem(); }
+  render();
+})();
+</script>
+</body>
+</html>
